@@ -34,11 +34,9 @@ class SignUp extends React.Component {
                 })
             })
             .then(response => response.json())
-            .then(data => {
-
-                console.log(this.state);
-                this.props.onRouteChange('signin');
-
+            .then(user => {
+                if (user.id)
+                    this.props.onRouteChange('signin');
             })
     }
 
@@ -61,7 +59,6 @@ class SignUp extends React.Component {
                                 <label className="db fw6 lh-copy f6" htmlFor="password">Password</label>
                                 <input onChange={this.onPasswordChange} className="b pa2 input-reset ba bg-transparent hover-bg-black hover-white w-100" type="password" name="password" id="password" />
                             </div>
-
                         </fieldset>
                         <div className="">
                             <input className="b ph3 pv2 input-reset ba b--black bg-transparent grow pointer f6 dib" type="submit" value="Sign Up" onClick={this.onSubmitSignUp} />

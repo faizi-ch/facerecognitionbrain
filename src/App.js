@@ -9,7 +9,6 @@ import FaceDetection from './components/FaceDetection/FaceDetection';
 import './App.css';
 import 'tachyons';
 import Particles from 'react-particles-js';
-import Clarifai from 'clarifai';
 
 const particlesOptions = {
   particles: {
@@ -67,27 +66,24 @@ const particlesOptions = {
   "retina_detect": true
 }
 
-const app = new Clarifai.App({
-  apiKey: 'f7f84de0f71646b891f098e1763656b8'
-});
-
+const initialState = {
+  input: '',
+  imageUrl: '',
+  box: [],
+  route: 'signin',
+  isSignedIn: false,
+  user: {
+    id: '',
+    name: '',
+    email: '',
+    entries: 0,
+    joined: ''
+  }
+};
 class App extends Component {
   constructor() {
     super();
-    this.state = {
-      input: '',
-      imageUrl: '',
-      box: [],
-      route: 'signin',
-      isSignedIn: false,
-      user: {
-        id: '',
-        name: '',
-        email: '',
-        entries: 0,
-        joined: ''
-      }
-    }
+    this.state = initialState;
   }
 
   loadUser = (data) => {
@@ -127,7 +123,14 @@ class App extends Component {
   onButtonDetect = (event) => {
     this.setState({ imageUrl: this.state.input });
 
-    app.models.predict(Clarifai.FACE_DETECT_MODEL, this.state.input)
+    fetch('http://localhost:3000/imageurl', {
+      method: 'post',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        input: this.state.input
+      })
+    })
+      .then(response => response.json())
       .then(response => {
         if (response) {
           fetch('http://localhost:3000/image', {
@@ -141,7 +144,7 @@ class App extends Component {
             .then(count => {
               this.setState(Object.assign(this.state.user, { entries: count }))
             })
-
+            .catch(console.log);
         }
         this.displayFaceBox(this.calculateFaceLocation(response))
       })
@@ -153,7 +156,7 @@ class App extends Component {
       this.setState({ isSignedIn: true });
     }
     else if (route === 'signout') {
-      this.setState({ isSignedIn: false });
+      this.setState(initialState);
     }
     this.setState({ route: route });
   }
